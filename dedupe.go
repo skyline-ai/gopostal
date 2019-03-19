@@ -7,6 +7,7 @@ package postal
 */
 import "C"
 import (
+	"fmt"
 	"unsafe"
 )
 
@@ -63,7 +64,7 @@ func DefaultDuplicateOptions() DuplicateOptions {
 	return DuplicateOptions{}
 }
 
-func IsDuplicate(addressComponent AddressComponent, value1, value2 string, options DuplicateOptions) DuplicateStatus {
+func IsDuplicate(addressComponent AddressComponent, value1, value2 string, options DuplicateOptions) (DuplicateStatus, error) {
 	cValue1 := C.CString(value1)
 	defer C.free(unsafe.Pointer(cValue1))
 
@@ -87,22 +88,25 @@ func IsDuplicate(addressComponent AddressComponent, value1, value2 string, optio
 		cOptions.num_languages = 0
 	}
 
+	var status C.libpostal_duplicate_status_t
 	switch addressComponent {
 	case AddressStreet:
-		return DuplicateStatus(C.libpostal_is_street_duplicate(cValue1, cValue2, cOptions))
+		status = C.libpostal_is_street_duplicate(cValue1, cValue2, cOptions)
 	case AddressName:
-		return DuplicateStatus(C.libpostal_is_name_duplicate(cValue1, cValue2, cOptions))
+		status = C.libpostal_is_name_duplicate(cValue1, cValue2, cOptions)
 	case AddressHouseNumber:
-		return DuplicateStatus(C.libpostal_is_house_number_duplicate(cValue1, cValue2, cOptions))
+		status = C.libpostal_is_house_number_duplicate(cValue1, cValue2, cOptions)
 	case AddressPoBox:
-		return DuplicateStatus(C.libpostal_is_po_box_duplicate(cValue1, cValue2, cOptions))
+		status = C.libpostal_is_po_box_duplicate(cValue1, cValue2, cOptions)
 	case AddressUnit:
-		return DuplicateStatus(C.libpostal_is_unit_duplicate(cValue1, cValue2, cOptions))
+		status = C.libpostal_is_unit_duplicate(cValue1, cValue2, cOptions)
 	case AddressPostalCode:
-		return DuplicateStatus(C.libpostal_is_postal_code_duplicate(cValue1, cValue2, cOptions))
+		status = C.libpostal_is_postal_code_duplicate(cValue1, cValue2, cOptions)
+	default:
+		return 0, fmt.Errorf("unsupported address component: %s", addressComponent)
 	}
 
-	return DuplicateStatusNull
+	return DuplicateStatus(status), nil
 }
 
 func IsNameDuplicateFuzzy(tokens1 []string, scores1 float64, tokens2 []string, scores2 float64, options FuzzyDuplicateOptions) FuzzyDuplicateStatus {
