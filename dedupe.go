@@ -39,11 +39,6 @@ type FuzzyDuplicateOptions struct {
 	LikelyDupeThreshold  float64
 }
 
-type FuzzyDuplicateStatus struct {
-	DuplicateStatus DuplicateStatus
-	Similarity      float64
-}
-
 func DefaultFuzzyDuplicateOptions() FuzzyDuplicateOptions {
 	cDefaultFuzzyDuplicateOptions := C.libpostal_get_default_fuzzy_duplicate_options()
 	return FuzzyDuplicateOptions{
@@ -109,15 +104,7 @@ func IsDuplicate(addressComponent AddressComponent, value1, value2 string, optio
 	return DuplicateStatus(status), nil
 }
 
-func IsNameDuplicateFuzzy(tokens1 []string, scores1 float64, tokens2 []string, scores2 float64, options FuzzyDuplicateOptions) FuzzyDuplicateStatus {
-	return isDuplicateFuzzy(AddressName, tokens1, scores1, tokens2, scores2, options)
-}
-
-func IsStreetDuplicateFuzzy(tokens1 []string, scores1 float64, tokens2 []string, scores2 float64, options FuzzyDuplicateOptions) FuzzyDuplicateStatus {
-	return isDuplicateFuzzy(AddressStreet, tokens1, scores1, tokens2, scores2, options)
-}
-
-func isDuplicateFuzzy(addressComponent AddressComponent, tokens1 []string, scores1 float64, tokens2 []string, scores2 float64, options FuzzyDuplicateOptions) FuzzyDuplicateStatus {
+func IsDuplicateFuzzy(addressComponent AddressComponent, tokens1 []string, scores1 float64, tokens2 []string, scores2 float64, options FuzzyDuplicateOptions) (DuplicateStatus, float64, error) {
 	cOptions := C.libpostal_get_default_fuzzy_duplicate_options()
 	cOptions.needs_review_threshold = C.double(options.NeedsReviewThreshold)
 	cOptions.likely_dupe_threshold = C.double(options.LikelyDupeThreshold)
@@ -161,13 +148,10 @@ func isDuplicateFuzzy(addressComponent AddressComponent, tokens1 []string, score
 	case AddressName:
 		cStatus = C.libpostal_is_name_duplicate_fuzzy(cNumTokens1, &cTokens1[0], &cScores1, cNumTokens2, &cTokens2[0], &cScores2, cOptions)
 	default:
-		return FuzzyDuplicateStatus{}
+		return 0, 0, fmt.Errorf("unsupported address component: %s", addressComponent)
 	}
 
-	return FuzzyDuplicateStatus{
-		DuplicateStatus: DuplicateStatus(cStatus.status),
-		Similarity:      float64(cStatus.similarity),
-	}
+	return DuplicateStatus(cStatus.status), float64(cStatus.similarity), nil
 }
 
 func IsToponymDuplicate(labels1 []string, values1 []string, labels2 []string, values2 []string, options DuplicateOptions) DuplicateStatus {
