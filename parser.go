@@ -26,11 +26,6 @@ func DefaultParserOptions() ParserOptions {
 	return ParserOptions{}
 }
 
-type ParsedComponent struct {
-	Label string `json:"label"`
-	Value string `json:"value"`
-}
-
 func setupParser() {
 	if !parserLoaded {
 		parserLoaded = bool(C.libpostal_setup_parser())
@@ -44,11 +39,11 @@ func teardownParser() {
 	C.libpostal_teardown_parser()
 }
 
-func ParseAddress(address string, options ParserOptions) []ParsedComponent {
+func ParseAddress(address string, options ParserOptions) ([]string, []string) {
 	setupParser()
 
 	if !utf8.ValidString(address) {
-		return nil
+		return nil, nil
 	}
 
 	cAddress := C.CString(address)
@@ -72,7 +67,7 @@ func ParseAddress(address string, options ParserOptions) []ParsedComponent {
 	cAddressParserResponsePtr := C.libpostal_parse_address(cAddress, cOptions)
 
 	if cAddressParserResponsePtr == nil {
-		return nil
+		return nil, nil
 	}
 
 	cAddressParserResponse := *cAddressParserResponsePtr
@@ -83,22 +78,20 @@ func ParseAddress(address string, options ParserOptions) []ParsedComponent {
 
 	numComponents := uint64(cNumComponents)
 
-	parsedComponents := make([]ParsedComponent, numComponents)
-
 	cComponentsPtr := (*[1 << 30](*C.char))(unsafe.Pointer(cComponents))
 	cLabelsPtr := (*[1 << 30](*C.char))(unsafe.Pointer(cLabels))
 
+	var labels []string
+	var values []string
 	var i uint64
 	for i = 0; i < numComponents; i++ {
-		parsedComponents[i] = ParsedComponent{
-			Label: C.GoString(cLabelsPtr[i]),
-			Value: C.GoString(cComponentsPtr[i]),
-		}
+		labels = append(labels, C.GoString(cLabelsPtr[i]))
+		values = append(values, C.GoString(cComponentsPtr[i]))
 	}
 
 	C.libpostal_address_parser_response_destroy(cAddressParserResponsePtr)
 
-	return parsedComponents
+	return labels, values
 }
 
 func ParserPrintFeatures(b bool) bool {

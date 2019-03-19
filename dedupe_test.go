@@ -8,9 +8,11 @@ import (
 )
 
 func TestIsDuplicate(t *testing.T) {
-	status := postal.IsDuplicate(postal.AddressStreet, "6020 Churchland St #1", "6020 Churchland Blvd #1", postal.DefaultDuplicateOptions())
+	status, err := postal.IsDuplicate(postal.AddressStreet, "6020 Churchland St #1", "6020 Churchland Blvd #1", postal.DefaultDuplicateOptions())
+	assert.Nil(t, err)
 	assert.Equal(t, postal.DuplicateStatusPossible, status)
-	status = postal.IsDuplicate(postal.AddressName, "Home I", "Home 2", postal.DefaultDuplicateOptions())
+	status, err = postal.IsDuplicate(postal.AddressName, "Home I", "Home 2", postal.DefaultDuplicateOptions())
+	assert.Nil(t, err)
 	assert.Equal(t, postal.DuplicateStatusNon, status)
 }
 
@@ -29,8 +31,10 @@ func TestIsNameDuplicateFuzzy(t *testing.T) {
 	tokens2 := []string{"The", "Name 2"}
 	scores2 := 1.0
 	opts := postal.DefaultFuzzyDuplicateOptions()
-	status := postal.IsNameDuplicateFuzzy(tokens1, scores1, tokens2, scores2, opts)
-	assert.Equal(t, postal.DuplicateStatusLikely.String(), status.DuplicateStatus.String())
+	status, sim, err := postal.IsDuplicateFuzzy(postal.AddressName, tokens1, scores1, tokens2, scores2, opts)
+	assert.Nil(t, err)
+	assert.Equal(t, postal.DuplicateStatusPossible.String(), status.String())
+	assert.Equal(t, 0.7071067811865475, sim)
 }
 
 func TestIsStreetDuplicateFuzzy(t *testing.T) {
@@ -39,6 +43,8 @@ func TestIsStreetDuplicateFuzzy(t *testing.T) {
 	tokens2 := []string{"East", "Beaver", "Creek", "Road"}
 	scores2 := 1.0
 	opts := postal.DefaultFuzzyDuplicateOptions()
-	status := postal.IsStreetDuplicateFuzzy(tokens1, scores1, tokens2, scores2, opts)
-	assert.Equal(t, postal.DuplicateStatusPossible.String(), status.DuplicateStatus.String())
+	status, sim, err := postal.IsDuplicateFuzzy(postal.AddressStreet, tokens1, scores1, tokens2, scores2, opts)
+	assert.Nil(t, err)
+	assert.Equal(t, postal.DuplicateStatusPossible.String(), status.String())
+	assert.Equal(t, 0.7071067811865475, sim)
 }
