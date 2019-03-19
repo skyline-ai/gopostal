@@ -26,3 +26,40 @@ const (
 	AddressPoBox       AddressComponent = C.LIBPOSTAL_ADDRESS_PO_BOX
 	AddressAll         AddressComponent = C.LIBPOSTAL_ADDRESS_ALL
 )
+
+func (a AddressComponent) String() string {
+	switch a {
+	case AddressNone:
+		return "None"
+	case AddressAny:
+		return "Any"
+	case AddressName:
+		return "Name"
+	case AddressHouseNumber:
+		return "HouseNumber"
+	case AddressStreet:
+		return "Street"
+	case AddressUnit:
+		return "Unit"
+	case AddressLevel:
+		return "Level"
+	case AddressStaircase:
+		return "Staircase"
+	case AddressEntrance:
+		return "Entrance"
+	case AddressCategory:
+		return "Category"
+	case AddressNear:
+		return "Near"
+	case AddressToponym:
+		return "Toponym"
+	case AddressPostalCode:
+		return "PostalCode"
+	case AddressPoBox:
+		return "PoBox"
+	case AddressAll:
+		return "All"
+	}
+
+	return ""
+}
