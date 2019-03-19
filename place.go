@@ -6,7 +6,103 @@ package postal
 #include <stdlib.h>
 */
 import "C"
-import "unsafe"
+import (
+	"fmt"
+	"unsafe"
+)
+
+type Place struct {
+	Name          string
+	HouseNumber   string
+	Street        string
+	Building      string
+	Entrance      string
+	Staircase     string
+	Level         string
+	Unit          string
+	PoBox         string
+	MetroStation  string
+	Suburb        string
+	CityDistrict  string
+	City          string
+	StateDistrict string
+	Island        string
+	State         string
+	CountryRegion string
+	Country       string
+	WorldRegion   string
+	PostalCode    string
+	Telephone     string
+	Website       string
+}
+
+func PlaceFromComponents(labels []string, values []string) (*Place, error) {
+	if len(labels) != len(values) {
+		return nil, fmt.Errorf("lables and values length must be equal")
+	}
+
+	if len(labels) == 0 {
+		return nil, fmt.Errorf("lables is empty")
+	}
+
+	place := &Place{}
+
+	for i := range labels {
+		label := labels[i]
+		value := values[i]
+
+		switch label {
+		case AddressLabelHouse:
+			place.Name = value
+		case AddressLabelHouseNumber:
+			place.HouseNumber = value
+		case AddressLabelPoBox:
+			place.PoBox = value
+		case AddressLabelBuilding:
+			place.Building = value
+		case AddressLabelEntrance:
+			place.Entrance = value
+		case AddressLabelStaircase:
+			place.Staircase = value
+		case AddressLabelLevel:
+			place.Level = value
+		case AddressLabelUnit:
+			place.Unit = value
+		case AddressLabelRoad:
+			place.Street = value
+		case AddressLabelMetroStation:
+			place.MetroStation = value
+		case AddressLabelSuburb:
+			place.Suburb = value
+		case AddressLabelCityDistrict:
+			place.CityDistrict = value
+		case AddressLabelCity:
+			place.City = value
+		case AddressLabelStateDistrict:
+			place.StateDistrict = value
+		case AddressLabelIsland:
+			place.Island = value
+		case AddressLabelState:
+			place.State = value
+		case AddressLabelPostalCode:
+			place.PostalCode = value
+		case AddressLabelCountryRegion:
+			place.CountryRegion = value
+		case AddressLabelCountry:
+			place.Country = value
+		case AddressLabelWorldRegion:
+			place.WorldRegion = value
+		case AddressLabelWebsite:
+			place.Website = value
+		case AddressLabelTelephone:
+			place.Telephone = value
+		default:
+			return nil, fmt.Errorf("unsupported label: %s", label)
+		}
+	}
+
+	return place, nil
+}
 
 func PlaceLanguages(labels []string, values []string) []string {
 	cLabels := make([]*C.char, len(labels))
