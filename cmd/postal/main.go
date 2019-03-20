@@ -23,9 +23,9 @@ func main() {
 			Action: func(c *cli.Context) error {
 				address := c.Args().Get(0)
 
-				comps := postal.ParseAddress(address, postal.DefaultParserOptions())
-				for _, comp := range comps {
-					fmt.Printf("%s: '%s'\n", comp.Label, comp.Value)
+				labels, values := postal.ParseAddress(address, postal.DefaultParserOptions())
+				for i := range labels {
+					fmt.Printf("%s: '%s'\n", labels[i], values[i])
 				}
 
 				return nil
