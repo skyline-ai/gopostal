@@ -97,7 +97,7 @@ func PlaceFromComponents(labels []string, values []string) (*Place, error) {
 		case AddressLabelTelephone:
 			place.Telephone = value
 		default:
-			return nil, fmt.Errorf("unsupported label: %s", label)
+			fmt.Println("unsupported label:", label)
 		}
 	}
 
