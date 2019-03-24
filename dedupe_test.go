@@ -17,11 +17,22 @@ func TestIsDuplicate(t *testing.T) {
 }
 
 func TestIsToponymDuplicate(t *testing.T) {
-	labels1 := []string{postal.AddressLabelRoad, postal.AddressLabelCity, postal.AddressLabelState, postal.AddressLabelCountry, postal.AddressLabelHouse}
-	values1 := []string{"426 East Beaver Creek Rd", "Knoxville", "TN", "USA", "home 1"}
-	labels2 := []string{postal.AddressLabelRoad, postal.AddressLabelCity, postal.AddressLabelState, postal.AddressLabelCountry, postal.AddressLabelHouse}
-	values2 := []string{"426 East Beaver Creek Rd", "Knoxville", "TN", "USA", "home1"}
-	status := postal.IsToponymDuplicate(labels1, values1, labels2, values2, postal.DefaultDuplicateOptions())
+	comps1 := map[string]string{
+		postal.AddressLabelRoad:    "426 East Beaver Creek Rd",
+		postal.AddressLabelCity:    "Knoxville",
+		postal.AddressLabelState:   "TN",
+		postal.AddressLabelCountry: "USA",
+		postal.AddressLabelHouse:   "home 1",
+	}
+	comps2 := map[string]string{
+		postal.AddressLabelRoad:    "426 East Beaver Creek Rd",
+		postal.AddressLabelCity:    "Knoxville",
+		postal.AddressLabelState:   "TN",
+		postal.AddressLabelCountry: "USA",
+		postal.AddressLabelHouse:   "home1",
+	}
+
+	status := postal.IsToponymDuplicate(comps1, comps2, postal.DefaultDuplicateOptions())
 	assert.Equal(t, postal.DuplicateStatusExact, status)
 }
 

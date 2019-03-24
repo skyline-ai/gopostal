@@ -47,7 +47,7 @@ func DefaultNearDupeHashOptions() NearDupeHashOptions {
 	}
 }
 
-func NearDupeHashes(labels []string, values []string, options NearDupeHashOptions) []string {
+func NearDupeHashes(comps map[string]string, options NearDupeHashOptions) []string {
 	cOptions := C.libpostal_get_near_dupe_hash_default_options()
 	cOptions.with_name = C.bool(options.WithName)
 	cOptions.with_address = C.bool(options.WithAddress)
@@ -77,21 +77,19 @@ func NearDupeHashes(labels []string, values []string, options NearDupeHashOption
 		}
 	}
 
-	cLabels := make([]*C.char, len(labels))
-	for i, label := range labels {
+	var cLabels, cValues []*C.char
+
+	for label, value := range comps {
 		cLabel := C.CString(label)
 		defer C.free(unsafe.Pointer(cLabel))
-		cLabels[i] = cLabel
-	}
+		cLabels = append(cLabels, cLabel)
 
-	cValues := make([]*C.char, len(values))
-	for i, value := range values {
 		cValue := C.CString(value)
 		defer C.free(unsafe.Pointer(cValue))
-		cValues[i] = cValue
+		cValues = append(cValues, cValue)
 	}
 
-	cNumComponents := C.ulong(len(labels))
+	cNumComponents := C.ulong(len(comps))
 	cNumHashes := C.size_t(0)
 
 	var cHashes **C.char

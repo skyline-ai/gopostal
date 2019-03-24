@@ -39,11 +39,11 @@ func teardownParser() {
 	C.libpostal_teardown_parser()
 }
 
-func ParseAddress(address string, options ParserOptions) ([]string, []string) {
+func ParseAddress(address string, options ParserOptions) map[string]string {
 	setupParser()
 
 	if !utf8.ValidString(address) {
-		return nil, nil
+		return nil
 	}
 
 	cAddress := C.CString(address)
@@ -67,7 +67,7 @@ func ParseAddress(address string, options ParserOptions) ([]string, []string) {
 	cAddressParserResponsePtr := C.libpostal_parse_address(cAddress, cOptions)
 
 	if cAddressParserResponsePtr == nil {
-		return nil, nil
+		return nil
 	}
 
 	cAddressParserResponse := *cAddressParserResponsePtr
@@ -81,17 +81,17 @@ func ParseAddress(address string, options ParserOptions) ([]string, []string) {
 	cComponentsPtr := (*[1 << 30](*C.char))(unsafe.Pointer(cComponents))
 	cLabelsPtr := (*[1 << 30](*C.char))(unsafe.Pointer(cLabels))
 
-	var labels []string
-	var values []string
+	comps := make(map[string]string, 0)
 	var i uint64
 	for i = 0; i < numComponents; i++ {
-		labels = append(labels, C.GoString(cLabelsPtr[i]))
-		values = append(values, C.GoString(cComponentsPtr[i]))
+		label := C.GoString(cLabelsPtr[i])
+		value := C.GoString(cComponentsPtr[i])
+		comps[label] = value
 	}
 
 	C.libpostal_address_parser_response_destroy(cAddressParserResponsePtr)
 
-	return labels, values
+	return comps
 }
 
 func ParserPrintFeatures(b bool) bool {

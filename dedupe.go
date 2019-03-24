@@ -154,7 +154,7 @@ func IsDuplicateFuzzy(addressComponent AddressComponent, tokens1 []string, score
 	return DuplicateStatus(cStatus.status), float64(cStatus.similarity), nil
 }
 
-func IsToponymDuplicate(labels1 []string, values1 []string, labels2 []string, values2 []string, options DuplicateOptions) DuplicateStatus {
+func IsToponymDuplicate(comps1 map[string]string, comps2 map[string]string, options DuplicateOptions) DuplicateStatus {
 	cOptions := C.libpostal_get_default_duplicate_options()
 	if options.Languages != nil {
 		cLanguages := make([]*C.char, len(options.Languages))
@@ -169,34 +169,30 @@ func IsToponymDuplicate(labels1 []string, values1 []string, labels2 []string, va
 		cOptions.num_languages = 0
 	}
 
-	cLabels1 := make([]*C.char, len(labels1))
-	for i, label := range labels1 {
+	var cLabels1, cValues1, cLabels2, cValues2 []*C.char
+
+	for label, value := range comps1 {
 		cLabel := C.CString(label)
 		defer C.free(unsafe.Pointer(cLabel))
-		cLabels1[i] = cLabel
+		cLabels1 = append(cLabels1, cLabel)
+
+		cValue := C.CString(value)
+		defer C.free(unsafe.Pointer(cValue))
+		cValues1 = append(cValues1, cValue)
 	}
-	cLabels2 := make([]*C.char, len(labels2))
-	for i, label := range labels2 {
+
+	for label, value := range comps2 {
 		cLabel := C.CString(label)
 		defer C.free(unsafe.Pointer(cLabel))
-		cLabels2[i] = cLabel
-	}
+		cLabels2 = append(cLabels2, cLabel)
 
-	cValues1 := make([]*C.char, len(values1))
-	for i, value := range values1 {
 		cValue := C.CString(value)
 		defer C.free(unsafe.Pointer(cValue))
-		cValues1[i] = cValue
-	}
-	cValues2 := make([]*C.char, len(values2))
-	for i, value := range values2 {
-		cValue := C.CString(value)
-		defer C.free(unsafe.Pointer(cValue))
-		cValues2[i] = cValue
+		cValues2 = append(cValues2, cValue)
 	}
 
-	cNumComponents1 := C.ulong(len(labels1))
-	cNumComponents2 := C.ulong(len(labels2))
+	cNumComponents1 := C.ulong(len(comps1))
+	cNumComponents2 := C.ulong(len(comps2))
 
 	cStatus := C.libpostal_is_toponym_duplicate(cNumComponents1, &cLabels1[0], &cValues1[0], cNumComponents2, &cLabels2[0], &cValues2[0], cOptions)
 

@@ -36,21 +36,14 @@ type Place struct {
 	Website       string
 }
 
-func PlaceFromComponents(labels []string, values []string) (*Place, error) {
-	if len(labels) != len(values) {
-		return nil, fmt.Errorf("lables and values length must be equal")
-	}
-
-	if len(labels) == 0 {
-		return nil, fmt.Errorf("lables is empty")
+func PlaceFromComponents(comps map[string]string) (*Place, error) {
+	if len(comps) == 0 {
+		return nil, nil
 	}
 
 	place := &Place{}
 
-	for i := range labels {
-		label := labels[i]
-		value := values[i]
-
+	for label, value := range comps {
 		switch label {
 		case AddressLabelHouse:
 			place.Name = value
@@ -104,21 +97,20 @@ func PlaceFromComponents(labels []string, values []string) (*Place, error) {
 	return place, nil
 }
 
-func PlaceLanguages(labels []string, values []string) []string {
-	cLabels := make([]*C.char, len(labels))
-	for i, label := range labels {
+func PlaceLanguages(comps map[string]string) []string {
+	var cLabels, cValues []*C.char
+
+	for label, value := range comps {
 		cLabel := C.CString(label)
 		defer C.free(unsafe.Pointer(cLabel))
-		cLabels[i] = cLabel
-	}
+		cLabels = append(cLabels, cLabel)
 
-	cValues := make([]*C.char, len(values))
-	for i, value := range values {
 		cValue := C.CString(value)
 		defer C.free(unsafe.Pointer(cValue))
-		cValues[i] = cValue
+		cValues = append(cValues, cValue)
 	}
-	cNumComponents := C.ulong(len(labels))
+
+	cNumComponents := C.ulong(len(comps))
 	cNumLanguages := C.size_t(0)
 	cLanguages := C.libpostal_place_languages(cNumComponents, &cLabels[0], &cValues[0], &cNumLanguages)
 	cLanguagesPtr := (*[1 << 30](*C.char))(unsafe.Pointer(cLanguages))

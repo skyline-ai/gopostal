@@ -8,8 +8,13 @@ import (
 )
 
 func TestPlaceLanguages(t *testing.T) {
-	lables := []string{postal.AddressLabelRoad, postal.AddressLabelHouseNumber, postal.AddressLabelCity, postal.AddressLabelState}
-	values := []string{"east beaver creek rd", "426", "knoxville", "tn"}
-	languages := postal.PlaceLanguages(lables, values)
+	comps := map[string]string{
+		postal.AddressLabelRoad:        "east beaver creek rd",
+		postal.AddressLabelHouseNumber: "426",
+		postal.AddressLabelCity:        "knoxville",
+		postal.AddressLabelState:       "tn",
+	}
+
+	languages := postal.PlaceLanguages(comps)
 	assert.Equal(t, []string{"en"}, languages)
 }

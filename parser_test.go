@@ -8,9 +8,18 @@ import (
 )
 
 func TestParseUSAddress(t *testing.T) {
-	labels, values := postal.ParseAddress("781 Franklin Ave Crown Heights Brooklyn NYC NY 11216 USA", postal.DefaultParserOptions())
-	assert.Equal(t, []string{"house_number", "road", "suburb", "city_district", "city", "state", "postcode", "country"}, labels)
-	assert.Equal(t, []string{"781", "franklin ave", "crown heights", "brooklyn", "nyc", "ny", "11216", "usa"}, values)
+	actual := postal.ParseAddress("781 Franklin Ave Crown Heights Brooklyn NYC NY 11216 USA", postal.DefaultParserOptions())
+	expected := map[string]string{
+		"country":       "usa",
+		"house_number":  "781",
+		"road":          "franklin ave",
+		"suburb":        "crown heights",
+		"city_district": "brooklyn",
+		"city":          "nyc",
+		"state":         "ny",
+		"postcode":      "11216",
+	}
+	assert.Equal(t, expected, actual)
 }
 
 func TestParserPrintFeatures(t *testing.T) {
