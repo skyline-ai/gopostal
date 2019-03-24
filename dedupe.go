@@ -59,7 +59,7 @@ func DefaultDuplicateOptions() DuplicateOptions {
 	return DuplicateOptions{}
 }
 
-func IsDuplicate(addressComponent AddressComponent, value1, value2 string, options DuplicateOptions) (DuplicateStatus, error) {
+func IsDuplicate(addressComponent uint16, value1, value2 string, options DuplicateOptions) (DuplicateStatus, error) {
 	cValue1 := C.CString(value1)
 	defer C.free(unsafe.Pointer(cValue1))
 
@@ -98,13 +98,13 @@ func IsDuplicate(addressComponent AddressComponent, value1, value2 string, optio
 	case AddressPostalCode:
 		status = C.libpostal_is_postal_code_duplicate(cValue1, cValue2, cOptions)
 	default:
-		return 0, fmt.Errorf("unsupported address component: %s", addressComponent)
+		return 0, fmt.Errorf("unsupported address component: %s", AddressComponentString(addressComponent))
 	}
 
 	return DuplicateStatus(status), nil
 }
 
-func IsDuplicateFuzzy(addressComponent AddressComponent, tokens1 []string, scores1 float64, tokens2 []string, scores2 float64, options FuzzyDuplicateOptions) (DuplicateStatus, float64, error) {
+func IsDuplicateFuzzy(addressComponent uint16, tokens1 []string, scores1 float64, tokens2 []string, scores2 float64, options FuzzyDuplicateOptions) (DuplicateStatus, float64, error) {
 	cOptions := C.libpostal_get_default_fuzzy_duplicate_options()
 	cOptions.needs_review_threshold = C.double(options.NeedsReviewThreshold)
 	cOptions.likely_dupe_threshold = C.double(options.LikelyDupeThreshold)
@@ -148,7 +148,7 @@ func IsDuplicateFuzzy(addressComponent AddressComponent, tokens1 []string, score
 	case AddressName:
 		cStatus = C.libpostal_is_name_duplicate_fuzzy(cNumTokens1, &cTokens1[0], &cScores1, cNumTokens2, &cTokens2[0], &cScores2, cOptions)
 	default:
-		return 0, 0, fmt.Errorf("unsupported address component: %s", addressComponent)
+		return 0, 0, fmt.Errorf("unsupported address component: %s", AddressComponentString(addressComponent))
 	}
 
 	return DuplicateStatus(cStatus.status), float64(cStatus.similarity), nil

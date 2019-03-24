@@ -7,27 +7,25 @@ package postal
 */
 import "C"
 
-type AddressComponent uint16
-
 const (
-	AddressNone        AddressComponent = C.LIBPOSTAL_ADDRESS_NONE
-	AddressAny         AddressComponent = C.LIBPOSTAL_ADDRESS_ANY
-	AddressName        AddressComponent = C.LIBPOSTAL_ADDRESS_NAME
-	AddressHouseNumber AddressComponent = C.LIBPOSTAL_ADDRESS_HOUSE_NUMBER
-	AddressStreet      AddressComponent = C.LIBPOSTAL_ADDRESS_STREET
-	AddressUnit        AddressComponent = C.LIBPOSTAL_ADDRESS_UNIT
-	AddressLevel       AddressComponent = C.LIBPOSTAL_ADDRESS_LEVEL
-	AddressStaircase   AddressComponent = C.LIBPOSTAL_ADDRESS_STAIRCASE
-	AddressEntrance    AddressComponent = C.LIBPOSTAL_ADDRESS_ENTRANCE
-	AddressCategory    AddressComponent = C.LIBPOSTAL_ADDRESS_CATEGORY
-	AddressNear        AddressComponent = C.LIBPOSTAL_ADDRESS_NEAR
-	AddressToponym     AddressComponent = C.LIBPOSTAL_ADDRESS_TOPONYM
-	AddressPostalCode  AddressComponent = C.LIBPOSTAL_ADDRESS_POSTAL_CODE
-	AddressPoBox       AddressComponent = C.LIBPOSTAL_ADDRESS_PO_BOX
-	AddressAll         AddressComponent = C.LIBPOSTAL_ADDRESS_ALL
+	AddressNone        uint16 = C.LIBPOSTAL_ADDRESS_NONE
+	AddressAny         uint16 = C.LIBPOSTAL_ADDRESS_ANY
+	AddressName        uint16 = C.LIBPOSTAL_ADDRESS_NAME
+	AddressHouseNumber uint16 = C.LIBPOSTAL_ADDRESS_HOUSE_NUMBER
+	AddressStreet      uint16 = C.LIBPOSTAL_ADDRESS_STREET
+	AddressUnit        uint16 = C.LIBPOSTAL_ADDRESS_UNIT
+	AddressLevel       uint16 = C.LIBPOSTAL_ADDRESS_LEVEL
+	AddressStaircase   uint16 = C.LIBPOSTAL_ADDRESS_STAIRCASE
+	AddressEntrance    uint16 = C.LIBPOSTAL_ADDRESS_ENTRANCE
+	AddressCategory    uint16 = C.LIBPOSTAL_ADDRESS_CATEGORY
+	AddressNear        uint16 = C.LIBPOSTAL_ADDRESS_NEAR
+	AddressToponym     uint16 = C.LIBPOSTAL_ADDRESS_TOPONYM
+	AddressPostalCode  uint16 = C.LIBPOSTAL_ADDRESS_POSTAL_CODE
+	AddressPoBox       uint16 = C.LIBPOSTAL_ADDRESS_PO_BOX
+	AddressAll         uint16 = C.LIBPOSTAL_ADDRESS_ALL
 )
 
-func (a AddressComponent) String() string {
+func AddressComponentString(a uint16) string {
 	switch a {
 	case AddressNone:
 		return "None"
