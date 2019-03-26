@@ -16,11 +16,3 @@ RUN git clone https://github.com/openvenues/libpostal . \
     && make install
 
 RUN ldconfig
-
-WORKDIR /usr/src/app
-
-COPY . .
-
-RUN go install -mod=vendor -v ./...
-
-ENTRYPOINT [ "postal" ]
