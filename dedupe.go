@@ -104,7 +104,14 @@ func IsDuplicate(addressComponent uint16, value1, value2 string, options Duplica
 	return DuplicateStatus(status), nil
 }
 
-func IsDuplicateFuzzy(addressComponent uint16, tokens1 []string, scores1 float64, tokens2 []string, scores2 float64, options FuzzyDuplicateOptions) (DuplicateStatus, float64, error) {
+func IsDuplicateFuzzy(addressComponent uint16, tokens1 []string, scores1 []float64, tokens2 []string, scores2 []float64, options FuzzyDuplicateOptions) (DuplicateStatus, float64, error) {
+	if len(tokens1) != len(scores1) {
+		return 0, 0, fmt.Errorf("tokens1 and scores1 arrays must be of equal length")
+	}
+	if len(tokens2) != len(scores2) {
+		return 0, 0, fmt.Errorf("tokens1 and scores1 arrays must be of equal length")
+	}
+
 	cOptions := C.libpostal_get_default_fuzzy_duplicate_options()
 	cOptions.needs_review_threshold = C.double(options.NeedsReviewThreshold)
 	cOptions.likely_dupe_threshold = C.double(options.LikelyDupeThreshold)
@@ -122,31 +129,39 @@ func IsDuplicateFuzzy(addressComponent uint16, tokens1 []string, scores1 float64
 		cOptions.num_languages = C.size_t(len(options.Languages))
 	}
 
-	cTokens1 := make([]*C.char, len(tokens1))
-	for i, token1 := range tokens1 {
-		cToken1 := C.CString(token1)
-		defer C.free(unsafe.Pointer(cToken1))
-		cTokens1[i] = cToken1
+	var cTokens1 []*C.char
+	for _, token := range tokens1 {
+		cToken := C.CString(token)
+		defer C.free(unsafe.Pointer(cToken))
+		cTokens1 = append(cTokens1, cToken)
 	}
-	cTokens2 := make([]*C.char, len(tokens2))
-	for i, token2 := range tokens2 {
-		cToken2 := C.CString(token2)
-		defer C.free(unsafe.Pointer(cToken2))
-		cTokens2[i] = cToken2
+
+	var cTokens2 []*C.char
+	for _, token := range tokens2 {
+		cToken := C.CString(token)
+		defer C.free(unsafe.Pointer(cToken))
+		cTokens2 = append(cTokens2, cToken)
+	}
+
+	var cScores1 []C.double
+	for _, score := range scores1 {
+		cScores1 = append(cScores1, C.double(score))
+	}
+
+	var cScores2 []C.double
+	for _, score := range scores2 {
+		cScores2 = append(cScores2, C.double(score))
 	}
 
 	cNumTokens1 := C.ulong(len(tokens1))
 	cNumTokens2 := C.ulong(len(tokens2))
 
-	cScores1 := C.double(scores1)
-	cScores2 := C.double(scores2)
-
 	var cStatus C.libpostal_fuzzy_duplicate_status_t
 	switch addressComponent {
 	case AddressStreet:
-		cStatus = C.libpostal_is_street_duplicate_fuzzy(cNumTokens1, &cTokens1[0], &cScores1, cNumTokens2, &cTokens2[0], &cScores2, cOptions)
+		cStatus = C.libpostal_is_street_duplicate_fuzzy(cNumTokens1, &cTokens1[0], &cScores1[0], cNumTokens2, &cTokens2[0], &cScores2[0], cOptions)
 	case AddressName:
-		cStatus = C.libpostal_is_name_duplicate_fuzzy(cNumTokens1, &cTokens1[0], &cScores1, cNumTokens2, &cTokens2[0], &cScores2, cOptions)
+		cStatus = C.libpostal_is_name_duplicate_fuzzy(cNumTokens1, &cTokens1[0], &cScores1[0], cNumTokens2, &cTokens2[0], &cScores2[0], cOptions)
 	default:
 		return 0, 0, fmt.Errorf("unsupported address component: %s", AddressComponentString(addressComponent))
 	}
