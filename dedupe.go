@@ -112,6 +112,20 @@ func IsDuplicateFuzzy(addressComponent uint16, tokens1 []string, scores1 []float
 		return 0, 0, fmt.Errorf("tokens1 and scores1 arrays must be of equal length")
 	}
 
+	// avoid segfault
+	if len(tokens1) > len(tokens2) {
+		for i := len(tokens2); i < len(tokens1); i++ {
+			tokens2 = append(tokens2, "")
+			scores2 = append(scores2, 0.0)
+		}
+	}
+	if len(tokens2) > len(tokens1) {
+		for i := len(tokens1); i < len(tokens2); i++ {
+			tokens1 = append(tokens1, "")
+			scores1 = append(scores1, 0.0)
+		}
+	}
+
 	cOptions := C.libpostal_get_default_fuzzy_duplicate_options()
 	cOptions.needs_review_threshold = C.double(options.NeedsReviewThreshold)
 	cOptions.likely_dupe_threshold = C.double(options.LikelyDupeThreshold)
